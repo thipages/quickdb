@@ -14,6 +14,8 @@ fieldDefinition follows SQLite definition rules but supports prefixes
 - `#INDEX` or `#UNIQUE` for adding an index (unique) to the field,
 - `#FK_parentTable` for associated to the field a foreign key to the primary key of its parent table
 
+Primary keys are automatically created with `id` name
+
 `$options` is an associated array for customization (one key currently)
 - `preField` : boolean (default:false). If true : all fields are prefixed by table name
 #### Example
