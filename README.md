@@ -17,8 +17,8 @@ fieldDefinition follows SQLite definition rules but supports shortcuts for index
 - `#FK_parentTable` to associate the field to the primary key of its parent table (foreign key)
 
 **`$options`** is an associated array for customization (one key currently)
-- `preField` : boolean (default:`false`). If true : all fields are prefixed by table name
-- `omniFields` : array allows defining fields present in all tables, default:
+- `prefield` : boolean (default:`false`). If true : all fields are prefixed by table name
+- `omnifields` : array allows defining fields present in all tables, default:
 ```
 [
     "created_at INTEGER  not null default (strftime('%s','now'))",
