@@ -1,14 +1,17 @@
 <?php
 namespace thipages\quick;
 class QDb {
-    private $tables=[];
-    public function addTable($name,$fields) {
-        $this->tables[$name]=$fields;
+    private static $options;
+    public static function defaultOptions() {
+        return [
+            'preField'=>false
+        ];
     }
-    public function getSql() {
+    public static function create($definition, $options=[]) {
+        self::$options=$options==null?self::defaultOptions():$options;
         $sql=[];
-        foreach($this->tables as $tableName=>$fields) {
-            $sql=array_merge($sql,self::create($tableName,$fields));
+        foreach($definition as $tableName=>$fields) {
+            $sql=array_merge($sql,self::_create($tableName,$fields));
         }
         return $sql;
     }
@@ -25,7 +28,7 @@ class QDb {
             $index=1;
             $s=[str_replace('#INDEX','',$source)];
         } else {
-            $s=explode('#UNIQUE_INDEX', $source);
+            $s=explode('#UNIQUE', $source);
             $index= count($s)>1?2:0;
         }
         return [$index,join(' ',$s)];
@@ -48,11 +51,16 @@ class QDb {
     private static function under(...$a) {
         return join('_',$a);
     }
-    private static function primaryKey($tableName) {
-        return self::under($tableName, 'id');
+    private static function preField($tableName,$fieldName) {
+        return self::$options['preField']
+            ? self::under($tableName, $fieldName)
+            : $fieldName;
     }
-    private static function create($tableName, $fields) {
-        $refId=self::under($tableName,'id');
+    private static function primaryKey($tableName) {
+        return self::preField($tableName, 'id');
+    }
+    private static function _create($tableName, $fields) {
+        $refId=self::primaryKey($tableName);
         $create=["$refId INTEGER PRIMARY KEY AUTOINCREMENT"];
         $indexes=[];
         $fks=[];
@@ -62,7 +70,7 @@ class QDb {
             $index=$indexOut[0];
             $f=$indexOut[1];
             $f=self::clean($f);
-            $childKey=self::under($tableName,explode(' ',$f)[0]);
+            $childKey=self::preField($tableName,explode(' ',$f)[0]);
             $fksOut=self::extractFks($indexOut[1]);
             if ($fksOut!==null) {
                 $f=$fksOut[0];
@@ -72,11 +80,11 @@ class QDb {
             }
             if ($index!==0) {
                 $unique=$index===2?'UNIQUE':'';
-                $iName=self::under($childKey,"idx");
+                $iName=self::under($tableName,$childKey,"idx");
                 $indexes[]=self::drop($iName,'INDEX');
                 $indexes[]="CREATE $unique INDEX $iName ON $tableName ($childKey);";
             }
-            $create[]=self::under($tableName,$f);
+            $create[]=self::preField($tableName,$f);
             if ($fks!=null) {
                 foreach ($fks as $fk) {
                     $parentKey=self::primaryKey($fk[0]);

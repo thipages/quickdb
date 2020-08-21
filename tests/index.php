@@ -3,6 +3,8 @@ require ('../src/thipages/quick/QDb.php');
 require('../vendor/autoload.php');
 use thipages\quick\QDb;
 use thipages\quick\QSql;
+use thipages\sqlitecli\SqliteCli;
+
 //
 $A1=[
     QDb::extractFks('fk INTEGER #FK_user'),
@@ -22,21 +24,31 @@ for ($i=0;$i<count($A1);$i++) {
 }
 print_r(array_map(function ($a,$i) use($A1){return $a?'ok':'nok:'.join('@',$A1[$i]);},$res, array_keys($res)));
 //
-$db=new QDb();
-$db->addTable('user','name TEXT #INDEX');
-$db->addTable('message',[
-    'content TEXT',
-    'date INTEGER',
-    'unique INTEGER #UNIQUE_INDEX',
-    'userId INTEGER #FK_user'
-]);
+$create= QDb::create(
+    [
+        'user'=>'name TEXT #INDEX',
+        'message'=>[
+            'content TEXT',
+            'date INTEGER',
+            'uniqueField INTEGER #UNIQUE',
+            'userId INTEGER NOT NULL #FK_user'
+        ]
+    ]
+);
 //
-$cli=new \thipages\sqlitecli\SqliteCli('test.db');
-//$subset=array_slice($db->getSql(),0,6);
-$res=$cli->execute($db->getSql());
+function fieldName($t,$f) {
+    global $preField;
+    return $preField ? $t."_".$f : $f;
+}
+function U($f) {return fieldName('user',$f);}
+function M($f) {return fieldName('message',$f);}
+$cli=new SqliteCli('test.db');
+$res=$cli->execute($create);
+$preField=false;
 $sqlList= [
-    QSql::insert('user',['user_name'=>'tit']),
-    QSql::insert('message',['message_unique'=>'tit'])
+    'PRAGMA foreign_keys=ON;',
+    QSql::insert('user',[U('name')=>'tit']),
+    QSql::insert('message',[M('uniqueField')=>'tit', M('userId')=>1])
 ];
-$res=$res=$cli->execute($sqlList);
+$res=$cli->execute($sqlList);
 print_r($res);
