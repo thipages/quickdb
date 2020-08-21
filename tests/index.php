@@ -30,8 +30,8 @@ $create= QDb::create(
         'message'=>[
             'content TEXT',
             'date INTEGER',
-            'uniqueField INTEGER #UNIQUE',
-            'userId INTEGER NOT NULL #FK_user'
+            'userId INTEGER NOT NULL #FK_user',
+            'uniqueField INTEGER #UNIQUE'
         ]
     ]
 );
@@ -42,13 +42,18 @@ function fieldName($t,$f) {
 }
 function U($f) {return fieldName('user',$f);}
 function M($f) {return fieldName('message',$f);}
+function isOk($c) {return $c?'ok':'nok';}
 $cli=new SqliteCli('test.db');
+print_r($create);
 $res=$cli->execute($create);
 $preField=false;
 $sqlList= [
     'PRAGMA foreign_keys=ON;',
     QSql::insert('user',[U('name')=>'tit']),
-    QSql::insert('message',[M('uniqueField')=>'tit', M('userId')=>1])
+    QSql::insert('message',[M('uniqueField')=>'tit', M('userId')=>1]),
+    'select created_at from message;'
 ];
 $res=$cli->execute($sqlList);
-print_r($res);
+echo "TEST CREATE + INSERT ";
+echo(isOk($res[0]));
+echo("\nTEST UTC DATE ".isOk($res[1][0]-time()===0));

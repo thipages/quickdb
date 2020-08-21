@@ -1,10 +1,17 @@
 <?php
 namespace thipages\quick;
 class QDb {
+    const prefield='prefield';
+    const omnifields='omnifields';
     private static $options;
     public static function defaultOptions() {
         return [
-            'preField'=>false
+            self::prefield=>false,
+            // https://stackoverflow.com/questions/200309/sqlite-database-default-time-value-now
+            self::omnifields=>[
+                "created_at INTEGER  not null default (strftime('%s','now'))",
+                "modified_at INTEGER not null default (strftime('%s','now'))"
+            ]
         ];
     }
     public static function create($definition, $options=[]) {
@@ -52,7 +59,7 @@ class QDb {
         return join('_',$a);
     }
     private static function preField($tableName,$fieldName) {
-        return self::$options['preField']
+        return self::$options[self::prefield]
             ? self::under($tableName, $fieldName)
             : $fieldName;
     }
@@ -60,11 +67,14 @@ class QDb {
         return self::preField($tableName, 'id');
     }
     private static function _create($tableName, $fields) {
-        $refId=self::primaryKey($tableName);
-        $create=["$refId INTEGER PRIMARY KEY AUTOINCREMENT"];
-        $indexes=[];
-        $fks=[];
         if (!is_array($fields)) $fields=[$fields];
+        array_unshift($fields,'id INTEGER PRIMARY KEY AUTOINCREMENT');
+        if (self::$options[self::omnifields]!=null) {
+            foreach(self::$options[self::omnifields] as $field) array_push($fields,$field);
+        }
+        $create=[];
+        $fks=[];
+        $indexes=[];
         foreach ($fields as $field) {
             $indexOut=self::extractIndex($field);
             $index=$indexOut[0];
@@ -85,11 +95,12 @@ class QDb {
                 $indexes[]="CREATE $unique INDEX $iName ON $tableName ($childKey);";
             }
             $create[]=self::preField($tableName,$f);
-            if ($fks!=null) {
-                foreach ($fks as $fk) {
-                    $parentKey=self::primaryKey($fk[0]);
-                    $create[]="FOREIGN KEY($childKey) REFERENCES $fk[0]($parentKey)";
-                }
+            
+        }
+        if ($fks!=null) {
+            foreach ($fks as $fk) {
+                $parentKey=self::primaryKey($fk[0]);
+                $create[]="FOREIGN KEY($fk[1]) REFERENCES $fk[0]($parentKey)";
             }
         }
         return array_merge(
@@ -100,5 +111,4 @@ class QDb {
             $indexes
         );
     }
-    
 }
