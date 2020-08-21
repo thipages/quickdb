@@ -10,7 +10,7 @@ through the static method create
     Qdb::create($definition, $options=[]):Array<String>
 ```
 `$defintion` is an associative array <tableName,fieldDefinition>
-fieldDefinition follows SQLite definition rules but supports prefixes
+fieldDefinition follows SQLite definition rules but supports shortcuts for indexes and fks
 - `#INDEX` or `#UNIQUE` for adding an index (unique) to the field,
 - `#FK_parentTable` for associated to the field a foreign key to the primary key of its parent table
 
