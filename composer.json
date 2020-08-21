@@ -3,7 +3,7 @@
   "version": "v0.1.0",
   "description": "Quick SQLite database sql creation builder",
   "type": "library",
-  "keywords" : ["database","quick", "sqlite", "creation", "index", "foreign keys"],
+  "keywords" : ["database","quick", "sqlite", "creation", "index", "foreign-keys"],
   "license": "MIT",
   "authors": [
     {
