@@ -57,3 +57,5 @@ $res=$cli->execute($sqlList);
 echo "TEST CREATE + INSERT ";
 echo(isOk($res[0]));
 echo("\nTEST UTC DATE ".isOk($res[1][0]-time()===0));
+sleep(2);
+$res=$cli->execute(QDb::update('user',['name'=>'tit2'],'id=1'));

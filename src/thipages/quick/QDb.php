@@ -63,6 +63,9 @@ class QDb {
             ? self::under($tableName, $fieldName)
             : $fieldName;
     }
+    private static function getFieldFromDefinition($d) {
+        return explode(' ',$d)[0];
+    }
     private static function primaryKey($tableName) {
         return self::preField($tableName, 'id');
     }
@@ -80,7 +83,7 @@ class QDb {
             $index=$indexOut[0];
             $f=$indexOut[1];
             $f=self::clean($f);
-            $childKey=self::preField($tableName,explode(' ',$f)[0]);
+            $childKey=self::preField($tableName,self::getFieldFromDefinition($f));
             $fksOut=self::extractFks($indexOut[1]);
             if ($fksOut!==null) {
                 $f=$fksOut[0];
@@ -110,5 +113,17 @@ class QDb {
         ],
             $indexes
         );
+    }
+    public static function insert($tableName, $keyValues) {
+        return QSql::insert($tableName, $keyValues);
+    }
+    public static function update($tableName, $keyValues, $where) {
+        $fields=[];
+        foreach (self::$options[self::omnifields] as $d) $fields[]=self::getFieldFromDefinition($d);
+        if (in_array('modified_at',$fields) ) $keyValues['modified_at']=time();
+        return QSql::update($tableName, $keyValues,$where);
+    }
+    public static function delete($tableName, $keyValues, $where) {
+        return QSql::delete($tableName,$where);
     }
 }

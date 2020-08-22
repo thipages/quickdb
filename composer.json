@@ -1,6 +1,6 @@
 {
   "name": "thipages/quickdb",
-  "version": "v0.2.1",
+  "version": "v0.3.0",
   "description": "Quick SQLite database sql creation builder",
   "type": "library",
   "keywords" : ["database","quick", "sqlite", "creation", "index", "foreign-keys"],
@@ -15,8 +15,10 @@
   "autoload": {
     "psr-0": {"thipages\\quick\\": "src/"}
   },
-  "require-dev": {
-    "thipages/sqlitecli": "*",
+  "require": {
     "thipages/quicksql": "*"
+  },
+  "require-dev": {
+    "thipages/sqlitecli": "*"
   }
 }

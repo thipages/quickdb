@@ -4,10 +4,18 @@ Quick SQLite database sql creation builder
 ### Installation
 **composer** require thipages\quickdb
 
+### Dependency
+[quicksql](https://github.com/thipages/quicksql)
+
 ### Usage of QDb class
-through the static method create
+through the static methods
 ```php
+    // Creates sql database creation statements
     Qdb::create($definition, $options=[]):Array<String>
+    // From quicksql, creates insert/update/delete sql statements
+    Qdb::insert($tableName, $keyValues):String 
+    Qdb::update($tableName, $keyValues, $where):String
+    Qdb::delete($tableName, $keyValues, $where):String
 ```
 **Primary keys** are automatically created as `id` field name
 
@@ -25,7 +33,9 @@ fieldDefinition follows SQLite definition rules but supports shortcuts for index
     "modified_at INTEGER  not null default (strftime('%s','now'))"
 ]
 ```
-Note : `strftime('%s','now')` stores UTC unixtime
+Note 1 : if `modified_at` definition is present in omnifields options, it will be automatically updated on `update`
+
+Note 2 : `strftime('%s','now')` stores UTC unixtime
 #### Example
 ```php
 QDb::create(
