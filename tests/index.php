@@ -24,7 +24,8 @@ for ($i=0;$i<count($A1);$i++) {
 }
 print_r(array_map(function ($a,$i) use($A1){return $a?'ok':'nok:'.join('@',$A1[$i]);},$res, array_keys($res)));
 //
-$create= QDb::create(
+$db=new QDb();
+$create= $db->create(
     [
         'user'=>'name TEXT #INDEX',
         'message'=>[
@@ -58,4 +59,4 @@ echo "TEST CREATE + INSERT ";
 echo(isOk($res[0]));
 echo("\nTEST UTC DATE ".isOk($res[1][0]-time()===0));
 sleep(2);
-$res=$cli->execute(QDb::update('user',['name'=>'tit2'],'id=1'));
+$res=$cli->execute($db->update('user',['name'=>'tit2'],'id=1'));

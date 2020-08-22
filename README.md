@@ -7,15 +7,15 @@ Quick SQLite database sql creation builder
 ### Dependency
 [quicksql](https://github.com/thipages/quicksql)
 
-### Usage of QDb class
-through the static methods
+### QDb class API
+
 ```php
     // Creates sql database creation statements
-    Qdb::create($definition, $options=[]):Array<String>
+    create($definition, $options=[]):Array<String>
     // From quicksql, creates insert/update/delete sql statements
-    Qdb::insert($tableName, $keyValues):String 
-    Qdb::update($tableName, $keyValues, $where):String
-    Qdb::delete($tableName, $keyValues, $where):String
+    insert($tableName, $keyValues):String 
+    update($tableName, $keyValues, $where):String
+    delete($tableName, $keyValues, $where):String
 ```
 **Primary keys** are automatically created as `id` field name
 
@@ -38,7 +38,8 @@ Note 1 : if `modified_at` definition is present in omnifields options, it will b
 Note 2 : `strftime('%s','now')` stores UTC unixtime
 #### Example
 ```php
-QDb::create(
+$db=new QDb();
+QDb->create(
     [
         'user'=>'name TEXT #INDEX',
         'message'=>[

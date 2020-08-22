@@ -3,7 +3,10 @@ namespace thipages\quick;
 class QDb {
     const prefield='prefield';
     const omnifields='omnifields';
-    private static $options;
+    private $options;
+    public function __construct($options=[]) {
+        $this->options=$options==null?self::defaultOptions():$options;
+    }
     public static function defaultOptions() {
         return [
             self::prefield=>false,
@@ -14,13 +17,24 @@ class QDb {
             ]
         ];
     }
-    public static function create($definition, $options=[]) {
-        self::$options=$options==null?self::defaultOptions():$options;
+    public function create($definition) {
         $sql=[];
         foreach($definition as $tableName=>$fields) {
             $sql=array_merge($sql,self::_create($tableName,$fields));
         }
         return $sql;
+    }
+    public function insert($tableName, $keyValues) {
+        return QSql::insert($tableName, $keyValues);
+    }
+    public function update($tableName, $keyValues, $where) {
+        $fields=[];
+        foreach ($this->options[self::omnifields] as $d) $fields[]=self::getFieldFromDefinition($d);
+        if (in_array('modified_at',$fields) ) $keyValues['modified_at']=time();
+        return QSql::update($tableName, $keyValues,$where);
+    }
+    public function delete($tableName, $where) {
+        return QSql::delete($tableName,$where);
     }
     private static function drop($name, $type='TABLE') {
         return "DROP $type IF EXISTS $name;";
@@ -58,22 +72,22 @@ class QDb {
     private static function under(...$a) {
         return join('_',$a);
     }
-    private static function preField($tableName,$fieldName) {
-        return self::$options[self::prefield]
+    private function preField($tableName,$fieldName) {
+        return $this->options[self::prefield]
             ? self::under($tableName, $fieldName)
             : $fieldName;
     }
     private static function getFieldFromDefinition($d) {
         return explode(' ',$d)[0];
     }
-    private static function primaryKey($tableName) {
-        return self::preField($tableName, 'id');
+    private function primaryKey($tableName) {
+        return $this->preField($tableName, 'id');
     }
-    private static function _create($tableName, $fields) {
+    private function _create($tableName, $fields) {
         if (!is_array($fields)) $fields=[$fields];
         array_unshift($fields,'id INTEGER PRIMARY KEY AUTOINCREMENT');
-        if (self::$options[self::omnifields]!=null) {
-            foreach(self::$options[self::omnifields] as $field) array_push($fields,$field);
+        if ($this->options[self::omnifields]!=null) {
+            foreach($this->options[self::omnifields] as $field) array_push($fields,$field);
         }
         $create=[];
         $fks=[];
@@ -83,7 +97,7 @@ class QDb {
             $index=$indexOut[0];
             $f=$indexOut[1];
             $f=self::clean($f);
-            $childKey=self::preField($tableName,self::getFieldFromDefinition($f));
+            $childKey=$this->preField($tableName,self::getFieldFromDefinition($f));
             $fksOut=self::extractFks($indexOut[1]);
             if ($fksOut!==null) {
                 $f=$fksOut[0];
@@ -97,12 +111,12 @@ class QDb {
                 $indexes[]=self::drop($iName,'INDEX');
                 $indexes[]="CREATE $unique INDEX $iName ON $tableName ($childKey);";
             }
-            $create[]=self::preField($tableName,$f);
+            $create[]=$this->preField($tableName,$f);
             
         }
         if ($fks!=null) {
             foreach ($fks as $fk) {
-                $parentKey=self::primaryKey($fk[0]);
+                $parentKey=$this->primaryKey($fk[0]);
                 $create[]="FOREIGN KEY($fk[1]) REFERENCES $fk[0]($parentKey)";
             }
         }
@@ -114,16 +128,5 @@ class QDb {
             $indexes
         );
     }
-    public static function insert($tableName, $keyValues) {
-        return QSql::insert($tableName, $keyValues);
-    }
-    public static function update($tableName, $keyValues, $where) {
-        $fields=[];
-        foreach (self::$options[self::omnifields] as $d) $fields[]=self::getFieldFromDefinition($d);
-        if (in_array('modified_at',$fields) ) $keyValues['modified_at']=time();
-        return QSql::update($tableName, $keyValues,$where);
-    }
-    public static function delete($tableName, $keyValues, $where) {
-        return QSql::delete($tableName,$where);
-    }
+
 }
