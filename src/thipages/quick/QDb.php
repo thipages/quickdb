@@ -120,6 +120,9 @@ class QDb {
             foreach ($fks as $fk) {
                 $parentKey=$this->primaryKey($fk[0]);
                 $create[]="FOREIGN KEY($fk[1]) REFERENCES $fk[0]($parentKey)";
+                $iName=self::under($tableName,$fk[1],"idx");
+                $indexes[]=self::drop($iName,'INDEX');
+                $indexes[]="CREATE INDEX $iName ON $tableName ($fk[1]);";
             }
         }
         return array_merge(

@@ -19,6 +19,8 @@ Quick SQLite database sql creation builder
 ```
 **Primary keys** are automatically created as `id` field name
 
+**Foreign keys** are automatically indexed
+
 **`$defintion`** is an associative array <tableName,fieldDefinition>
 fieldDefinition follows SQLite definition rules but supports shortcuts for indexes and foreign keys
 - `#INDEX` or `#UNIQUE` to add an index (unique) to the field,
@@ -61,6 +63,9 @@ Array
     [5] => CREATE TABLE message (id INTEGER PRIMARY KEY AUTOINCREMENT,content TEXT,date INTEGER,userId INTEGER NOT NULL ,uniqueField INTEGER,created_at INTEGER not null default (strftime('%s','now')),modified_at INTEGER not null default (strftime('%s','now')),FOREIGN KEY(userId) REFERENCES user(id));
     [6] => DROP INDEX IF EXISTS message_uniqueField_idx;
     [7] => CREATE UNIQUE INDEX message_uniqueField_idx ON message (uniqueField);
+    [8] => DROP INDEX IF EXISTS message_userId_idx;
+    [9] => CREATE INDEX message_userId_idx ON message (userId);
+
 )
 */
 ```
