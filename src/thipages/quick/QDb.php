@@ -19,6 +19,7 @@ class QDb {
             ]
         ];
     }
+    // todo : add a second parameter $dropTable (default : false)
     public function create($definition) {
         $sql=[];
         foreach($definition as $tableName=>$fields) {
