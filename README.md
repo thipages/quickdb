@@ -26,7 +26,7 @@ fieldDefinition follows SQLite definition rules but supports shortcuts for index
 - `#INDEX` or `#UNIQUE` to add an index (unique) to the field,
 - `#FK_parentTable` to associate the field to the primary key of its parent table (foreign key)
 
-**`$options`** is an associated array for customization (one key currently)
+**`$options`** is an associated array for customization by merging with default
 - `primarykey : string` defines the primary key common to all tables, default : `id INTEGER PRIMARY KEY AUTOINCREMENT`
 - `prefield : boolean` (default:`false`). If true : all fields are prefixed by table name
 - `omnifields : array<string>` defines fields present in all tables, default:

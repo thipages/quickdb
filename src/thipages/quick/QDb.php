@@ -6,10 +6,8 @@ class QDb {
     const primarykey="primarykey";
     private $options;
     public function __construct($options=[]) {
-        $this->options=$options==null?self::defaultOptions():$options;
+        $this->options=array_merge(self::defaultOptions(),$options);
     }
-    // todo : enssure keys are present in $options
-    // todo : add primary keys as options as a new key 'pk'
     public static function defaultOptions() {
         return [
             self::prefield=>false,
