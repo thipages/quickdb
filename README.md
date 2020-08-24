@@ -11,11 +11,11 @@ Quick SQLite database sql creation builder
 
 ```php
     // Creates sql database creation statements
-    create($definition, $options=[]):Array<String>
+    create($definition, $options=[]):Array<string>
     // From quicksql, creates insert/update/delete sql statements
-    insert($tableName, $keyValues):String 
-    update($tableName, $keyValues, $where):String
-    delete($tableName, $keyValues, $where):String
+    insert($tableName, $keyValues):string 
+    update($tableName, $keyValues, $where):string
+    delete($tableName, $keyValues, $where):string
 ```
 **Primary keys** are automatically created as `id` field name
 
@@ -27,8 +27,9 @@ fieldDefinition follows SQLite definition rules but supports shortcuts for index
 - `#FK_parentTable` to associate the field to the primary key of its parent table (foreign key)
 
 **`$options`** is an associated array for customization (one key currently)
-- `prefield` : boolean (default:`false`). If true : all fields are prefixed by table name
-- `omnifields` : array allows defining fields present in all tables, default:
+- `primarykey : string` defines the primary key common to all tables, default : `id INTEGER PRIMARY KEY AUTOINCREMENT`
+- `prefield : boolean` (default:`false`). If true : all fields are prefixed by table name
+- `omnifields : array<string>` defines fields present in all tables, default:
 ```
 [
     "created_at INTEGER  not null default (strftime('%s','now'))",

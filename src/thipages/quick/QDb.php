@@ -3,6 +3,7 @@ namespace thipages\quick;
 class QDb {
     const prefield='prefield';
     const omnifields='omnifields';
+    const primarykey="primarykey";
     private $options;
     public function __construct($options=[]) {
         $this->options=$options==null?self::defaultOptions():$options;
@@ -16,7 +17,8 @@ class QDb {
             self::omnifields=>[
                 "created_at INTEGER  not null default (strftime('%s','now'))",
                 "modified_at INTEGER not null default (strftime('%s','now'))"
-            ]
+            ],
+            self::primarykey=>"id INTEGER PRIMARY KEY AUTOINCREMENT"
         ];
     }
     // todo : add a second parameter $dropTable (default : false)
@@ -88,7 +90,7 @@ class QDb {
     }
     private function _create($tableName, $fields) {
         if (!is_array($fields)) $fields=[$fields];
-        array_unshift($fields,'id INTEGER PRIMARY KEY AUTOINCREMENT');
+        array_unshift($fields,$this->options[self::primarykey]);
         if ($this->options[self::omnifields]!=null) {
             foreach($this->options[self::omnifields] as $field) array_push($fields,$field);
         }
