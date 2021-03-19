@@ -49,6 +49,7 @@ print_r($create);
 $res=$cli->execute($create);
 $preField=false;
 $sqlList= [
+    
     'PRAGMA foreign_keys=ON;',
     QSql::insert('user',[U('name')=>'tit']),
     QSql::insert('message',[M('uniqueField')=>'tit', M('userId')=>1]),

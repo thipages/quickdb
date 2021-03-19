@@ -42,7 +42,7 @@ Note 2 : `strftime('%s','now')` stores UTC unixtime
 #### Example
 ```php
 $db=new QDb();
-QDb->create(
+$db->create(
     [
         'user'=>'name TEXT #INDEX',
         'message'=>[
