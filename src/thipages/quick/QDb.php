@@ -1,23 +1,43 @@
 <?php
 namespace thipages\quick;
+use ArrayObject;
+
 class QDb {
     const prefield='prefield';
     const omnifields='omnifields';
     const primarykey="primarykey";
-    private $options;
+    const database="db";
+    protected $options;
     public function __construct($options=[]) {
-        $this->options=array_merge(self::defaultOptions(),$options);
+        $db=$options[self::database]??'sqlite';
+        $this->options=array_merge(self::defaultOptions($db),$options);
     }
-    public static function defaultOptions() {
-        return [
-            self::prefield=>false,
-            // https://stackoverflow.com/questions/200309/sqlite-database-default-time-value-now
-            self::omnifields=>[
-                "created_at INTEGER  not null default (strftime('%s','now'))",
-                "modified_at INTEGER not null default (strftime('%s','now'))"
-            ],
-            self::primarykey=>"id INTEGER PRIMARY KEY AUTOINCREMENT"
-        ];
+    public function getOptions() {
+        return (new ArrayObject($this->options))->getArrayCopy();
+    }
+    public function defaultOptions($db) {
+        $specific=($db==='sqlite')
+            ? [
+                QDb::database=>'sqlite',
+                QDb::omnifields=>[
+                    "created_at INTEGER  not null default (strftime('%s','now'))",
+                    "modified_at INTEGER not null default (strftime('%s','now'))"
+                ],
+                QDb::primarykey=>"id INTEGER PRIMARY KEY AUTOINCREMENT"
+            ]
+            : [
+                QDb::database=>'mysql',
+                QDb::omnifields=>[
+                    "created_at TIMESTAMP  not null default CURRENT_TIMESTAMP",
+                    "modified_at TIMESTAMP not null default CURRENT_TIMESTAMP ON UPDATE current_timestamp"
+                ],
+                QDb::primarykey=>"id INTEGER PRIMARY KEY AUTO_INCREMENT"
+            ];
+        
+        return array_merge(
+            [self::prefield=>false],
+            $specific
+        );
     }
     // todo : add a second parameter $dropTable (default : false)
     public function create($definition) {
@@ -33,7 +53,7 @@ class QDb {
     public function update($tableName, $keyValues, $where) {
         $fields=[];
         foreach ($this->options[self::omnifields] as $d) $fields[]=self::getFieldFromDefinition($d);
-        if (in_array('modified_at',$fields) ) $keyValues['modified_at']=time();
+        if ($this->options[self::database]=='sqlite' && in_array('modified_at',$fields) ) $keyValues['modified_at']=time();
         return QSql::update($tableName, $keyValues,$where);
     }
     public function delete($tableName, $where) {
@@ -111,7 +131,7 @@ class QDb {
             if ($index!==0) {
                 $unique=$index===2?'UNIQUE':'';
                 $iName=self::under($tableName,$childKey,"idx");
-                $indexes[]=self::drop($iName,'INDEX');
+                if ($this->options[self::database]==='sqlite') $indexes[]=self::drop($iName,'INDEX');
                 $indexes[]="CREATE $unique INDEX $iName ON $tableName ($childKey);";
             }
             $create[]=$this->preField($tableName,$f);
@@ -122,7 +142,7 @@ class QDb {
                 $parentKey=$this->primaryKey($fk[0]);
                 $create[]="FOREIGN KEY($fk[1]) REFERENCES $fk[0]($parentKey)";
                 $iName=self::under($tableName,$fk[1],"idx");
-                $indexes[]=self::drop($iName,'INDEX');
+                if ($this->options[self::database]==='sqlite') $indexes[]=self::drop($iName,'INDEX');
                 $indexes[]="CREATE INDEX $iName ON $tableName ($fk[1]);";
             }
         }

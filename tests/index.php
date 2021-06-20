@@ -1,11 +1,11 @@
 <?php
 require ('../src/thipages/quick/QDb.php');
 require('../vendor/autoload.php');
-use thipages\quick\QDb;
-use thipages\quick\QSql;
-use thipages\sqlitecli\SqliteCli;
+require('Test_Database.php');
 
-//
+use thipages\quick\QDb;
+
+// FK EXTRACTION TESTS
 $A1=[
     QDb::extractFks('fk INTEGER #FK_user'),
     QDb::extractFks('fk INTEGER #FK_user #INDEX')
@@ -22,42 +22,18 @@ for ($i=0;$i<count($A1);$i++) {
         $res[]= $A1[$i][0]===$A2[$i][0] && $A1[$i][1]===$A2[$i][1]; 
     }
 }
-print_r(array_map(function ($a,$i) use($A1){return $a?'ok':'nok:'.join('@',$A1[$i]);},$res, array_keys($res)));
-//
-$db=new QDb();
-$create= $db->create(
-    [
-        'user'=>'name TEXT #INDEX',
-        'message'=>[
-            'content TEXT',
-            'date INTEGER',
-            'userId INTEGER NOT NULL #FK_user',
-            'uniqueField INTEGER #UNIQUE'
-        ]
-    ]
-);
-//
-function fieldName($t,$f) {
-    global $preField;
-    return $preField ? $t."_".$f : $f;
+
+$success=[];
+$success['FK CASE 1']=$res[0]?'ok':'nok';
+$success['FK CASE 2']=$res[1]?'ok':'nok';
+if (true) {
+    // SQLite
+    $test=new Test_Database();
+    $success=array_merge($success,$test->run());
+} else {
+    // MySql/MariaDB
+    $test=new Test_Database(['db'=>'mysql']);
+    $success=array_merge($success,$test->run());
 }
-function U($f) {return fieldName('user',$f);}
-function M($f) {return fieldName('message',$f);}
-function isOk($c) {return $c?'ok':'nok';}
-$cli=new SqliteCli('test.db');
-print_r($create);
-$res=$cli->execute($create);
-$preField=false;
-$sqlList= [
-    
-    'PRAGMA foreign_keys=ON;',
-    QSql::insert('user',[U('name')=>'tit']),
-    QSql::insert('message',[M('uniqueField')=>'tit', M('userId')=>1]),
-    'select created_at from message;'
-];
-$res=$cli->execute($sqlList);
-echo "TEST CREATE + INSERT ";
-echo(isOk($res[0]));
-echo("\nTEST UTC DATE ".isOk($res[1][0]-time()===0));
-sleep(2);
-$res=$cli->execute($db->update('user',['name'=>'tit2'],'id=1'));
+print_r($success);
+
