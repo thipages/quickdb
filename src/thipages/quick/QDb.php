@@ -12,6 +12,11 @@ class QDb {
         $db=$options[self::database]??'sqlite';
         $this->options=array_merge(self::defaultOptions($db),$options);
     }
+    public function sql_switchFKs($on) {
+        return $this->options[self::database]==='sqlite'
+        ?'PRAGMA foreign_keys='.($on?'ON':'OFF').';'
+        :'SET FOREIGN_KEY_CHECKS='.($on?"1":"0").';';
+    }
     public function getOptions() {
         return (new ArrayObject($this->options))->getArrayCopy();
     }
@@ -41,10 +46,11 @@ class QDb {
     }
     // todo : add a second parameter $dropTable (default : false)
     public function create($definition) {
-        $sql=[];
+        $sql=[$this->sql_switchFKs(false)];
         foreach($definition as $tableName=>$fields) {
             $sql=array_merge($sql,self::_create($tableName,$fields));
         }
+        $sql[]=$this->sql_switchFKs(true);
         return $sql;
     }
     public function insert($tableName, $keyValues) {

@@ -26,7 +26,7 @@ for ($i=0;$i<count($A1);$i++) {
 $success=[];
 $success['FK CASE 1']=$res[0]?'ok':'nok';
 $success['FK CASE 2']=$res[1]?'ok':'nok';
-if (true) {
+if (false) {
     // SQLite
     $test=new Test_Database();
     $success=array_merge($success,$test->run());

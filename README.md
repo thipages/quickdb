@@ -65,30 +65,34 @@ $db->create(
 For Sqlite
 Array
 (
-    [0] => DROP TABLE IF EXISTS user;
-    [1] => CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT,name VARCHAR(10),created_at INTEGER not null default (strftime('%s','now')),modified_at INTEGER not null default (str
+    [0] => PRAGMA foreign_keys=OFF;
+    [1] => DROP TABLE IF EXISTS user;
+    [2] => CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT,name VARCHAR(10),created_at INTEGER not null default (strftime('%s','now')),modified_at INTEGER not null default (str
 ftime('%s','now')));
-    [2] => DROP INDEX IF EXISTS user_name_idx;
-    [3] => CREATE  INDEX user_name_idx ON user (name);
-    [4] => DROP TABLE IF EXISTS message;
-    [5] => CREATE TABLE message (id INTEGER PRIMARY KEY AUTOINCREMENT,content TEXT,userId INTEGER NOT NULL ,category TEXT,created_at INTEGER not null default (strftime('%s','now')),mod
+    [3] => DROP INDEX IF EXISTS user_name_idx;
+    [4] => CREATE  INDEX user_name_idx ON user (name);
+    [5] => DROP TABLE IF EXISTS message;
+    [6] => CREATE TABLE message (id INTEGER PRIMARY KEY AUTOINCREMENT,content TEXT,userId INTEGER NOT NULL ,category TEXT,created_at INTEGER not null default (strftime('%s','now')),mod
 ified_at INTEGER not null default (strftime('%s','now')),FOREIGN KEY(userId) REFERENCES user(id));
-    [6] => DROP INDEX IF EXISTS message_category_idx;
-    [7] => CREATE UNIQUE INDEX message_category_idx ON message (category);
-    [8] => DROP INDEX IF EXISTS message_userId_idx;
-    [9] => CREATE INDEX message_userId_idx ON message (userId);
+    [7] => DROP INDEX IF EXISTS message_category_idx;
+    [8] => CREATE UNIQUE INDEX message_category_idx ON message (category);
+    [9] => DROP INDEX IF EXISTS message_userId_idx;
+    [10] => CREATE INDEX message_userId_idx ON message (userId);
+    [11] => PRAGMA foreign_keys=ON;
 )
 
 For Mysql/MariaDB - varchar(10) for user name for compatibility
 Array
 (
-    [0] => DROP TABLE IF EXISTS user;
-    [1] => CREATE TABLE user (id INTEGER PRIMARY KEY AUTO_INCREMENT,name VARCHAR(10),created_at TIMESTAMP not null default CURRENT_TIMESTAMP,modified_at TIMESTAMP not null default CURRENT_TIMESTAMP ON UPDATE current_timestamp);
-    [2] => CREATE  INDEX user_name_idx ON user (name);
-    [3] => DROP TABLE IF EXISTS message;
-    [4] => CREATE TABLE message (id INTEGER PRIMARY KEY AUTO_INCREMENT,content TEXT,userId INTEGER NOT NULL ,category TEXT,created_at TIMESTAMP not null default CURRENT_TIMESTAMP,modified_at TIMESTAMP not null default CURRENT_TIMESTAMP ON UPDATE current_timestamp,FOREIGN KEY(userId) REFERENCES user(id));
-    [5] => CREATE UNIQUE INDEX message_category_idx ON message (category);
-    [6] => CREATE INDEX message_userId_idx ON message (userId);
+    [0] => SET FOREIGN_KEY_CHECKS=0;
+    [1] => DROP TABLE IF EXISTS user;
+    [2] => CREATE TABLE user (id INTEGER PRIMARY KEY AUTO_INCREMENT,name VARCHAR(10),created_at TIMESTAMP not null default CURRENT_TIMESTAMP,modified_at TIMESTAMP not null default CURRENT_TIMESTAMP ON UPDATE current_timestamp);
+    [3] => CREATE  INDEX user_name_idx ON user (name);
+    [4] => DROP TABLE IF EXISTS message;
+    [5] => CREATE TABLE message (id INTEGER PRIMARY KEY AUTO_INCREMENT,content TEXT,userId INTEGER NOT NULL ,category TEXT,created_at TIMESTAMP not null default CURRENT_TIMESTAMP,modified_at TIMESTAMP not null default CURRENT_TIMESTAMP ON UPDATE current_timestamp,FOREIGN KEY(userId) REFERENCES user(id));
+    [6] => CREATE UNIQUE INDEX message_category_idx ON message (category);
+    [7] => CREATE INDEX message_userId_idx ON message (userId);
+    [8] => SET FOREIGN_KEY_CHECKS=1;
 )
 */
 ```
